@@ -6,11 +6,30 @@ puppeteer.use(StealthPlugin());
 
 const DNS_Scrapper = async () => {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
   });
   const page = await browser.newPage();
 
   try {
+
+ 
+ await page.setRequestInterception(true);
+ page.on('request', (request) => {
+   const block =
+     ['image', 'stylesheet', 'font'].includes(
+       request.resourceType()
+     ) || request.url().startsWith('data:');
+   if (block) {
+     request.abort();
+   } else {
+     request.continue();
+   }
+ });
+
+
+
+
+
     await page.goto(
       'http://www.dns-shop.ru/catalog/17a8d26216404e77/vstraivaemye-xolodilniki/'
     );
