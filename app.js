@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const fs = require('fs');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 puppeteer.use(StealthPlugin());
 
@@ -35,18 +35,17 @@ const DNS_Scrapper = async () => {
 
     await browser.close();
 
-    const csvData = data
-      .map(
-        (product) =>
-          `Product Name:${product.title}` +
-          '\n' +
-          `Price:${product.price}` +
-          '\n'
-      )
-      .join('\n');
-    fs.writeFileSync('products.csv', csvData);
+    const csvWriter = createCsvWriter({
+      path: 'products.csv',
+      header: [
+        { id: 'title', title: 'Наименование' },
+        { id: 'price', title: 'Цена' },
+      ],
+    });
 
-    console.log('Information collected and saved in products.csv');
+    await csvWriter.writeRecords(data);
+
+    console.log('information saved in products.csv');
   } catch (error) {
     console.error('An error occurred:', error);
   } finally {
